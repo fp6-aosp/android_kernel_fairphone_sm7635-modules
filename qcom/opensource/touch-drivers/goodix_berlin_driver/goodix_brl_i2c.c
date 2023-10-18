@@ -155,8 +155,7 @@ write_exit:
 	return r;
 }
 
-static int goodix_i2c_probe(struct i2c_client *client,
-	const struct i2c_device_id *dev_id)
+static int goodix_i2c_probe(struct i2c_client *client)
 {
 	struct goodix_device_resource *dev_res;
 	int ret = 0;
