@@ -6,5 +6,3 @@
 
 #define CONFIG_MSM_SPCOM 1
 #define CONFIG_MSM_SPSS_UTILS 1
-
-

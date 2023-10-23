@@ -3493,7 +3493,7 @@ static int spcom_register_chardev(void)
 		return ret;
 	}
 
-	spcom_dev->driver_class = class_create(THIS_MODULE, DEVICE_NAME);
+	spcom_dev->driver_class = class_create(DEVICE_NAME);
 	if (IS_ERR(spcom_dev->driver_class)) {
 		ret = -ENOMEM;
 		spcom_pr_err("class_create failed %d\n", ret);

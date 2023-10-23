@@ -674,7 +674,7 @@ static int spss_utils_create_chardev(struct device *dev)
 		return ret;
 	}
 
-	spss_utils_dev->driver_class = class_create(THIS_MODULE, DEVICE_NAME);
+	spss_utils_dev->driver_class = class_create(DEVICE_NAME);
 	if (IS_ERR(spss_utils_dev->driver_class)) {
 		ret = -ENOMEM;
 		pr_err("class_create failed %d\n", ret);
