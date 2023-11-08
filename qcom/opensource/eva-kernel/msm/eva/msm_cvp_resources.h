@@ -69,9 +69,7 @@ struct clock_set {
 };
 
 struct bus_info {
-	char *name;
-	int master;
-	int slave;
+	const char *name;
 	unsigned int range[2];
 	const char *governor;
 	struct device *dev;
