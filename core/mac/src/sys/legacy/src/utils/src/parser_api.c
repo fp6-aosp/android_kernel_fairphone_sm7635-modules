@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2012-2021 The Linux Foundation. All rights reserved.
- * Copyright (c) 2021-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2021-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Permission to use, copy, modify, and/or distribute this software for
  * any purpose with or without fee is hereby granted, provided that the
@@ -7637,14 +7637,15 @@ populate_dot11f_twt_he_cap(struct mac_context *mac,
 	bcast_requestor = bcast_requestor &&
 			  !mac->mlme_cfg->twt_cfg.disable_btwt_usr_cfg;
 	wlan_twt_get_bcast_responder_cfg(mac->psoc, &bcast_responder);
-	wlan_twt_get_requestor_cfg(mac->psoc, &twt_requestor);
-	wlan_twt_get_responder_cfg(mac->psoc, &twt_responder);
 
 	he_cap->broadcast_twt = 0;
-	if (session->opmode == QDF_STA_MODE ||
-	    session->opmode == QDF_SAP_MODE) {
+	if (session->opmode == QDF_STA_MODE) {
+		wlan_twt_get_requestor_cfg(mac->psoc, &twt_requestor);
 		he_cap->twt_request =
 			twt_requestor && twt_get_requestor_flag(mac);
+	}
+	if (session->opmode == QDF_SAP_MODE) {
+		wlan_twt_get_responder_cfg(mac->psoc, &twt_responder);
 		he_cap->twt_responder =
 			twt_responder && twt_get_responder_flag(mac);
 	}
