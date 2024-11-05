@@ -295,6 +295,9 @@ dlm_update_avoidlist_reject_reason(struct dlm_reject_ap *entry,
 	case REASON_ROAM_HO_FAILURE:
 		entry->ho_fail = true;
 		break;
+	case REASON_EAPOL_TIMEOUT:
+		entry->eapol_timeout = true;
+		break;
 	default:
 		dlm_err("Invalid reason passed %d", reject_reason);
 	}
