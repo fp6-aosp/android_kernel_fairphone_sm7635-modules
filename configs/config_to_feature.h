@@ -1736,10 +1736,6 @@
 #endif
 
 #ifdef CONFIG_RHINE
-#define DISABLE_MON_RING_MSI_CFG (1)
-#endif
-
-#ifdef CONFIG_RHINE
 #define FEATURE_IRQ_AFFINITY (1)
 #endif
 
