@@ -8648,6 +8648,8 @@ const struct nla_policy wlan_hdd_wifi_config_policy[
 	[QCA_WLAN_VENDOR_ATTR_CONFIG_BTM_SUPPORT] = {.type = NLA_U8},
 	[QCA_WLAN_VENDOR_ATTR_CONFIG_KEEP_ALIVE_INTERVAL] = {
 		.type = NLA_U16},
+	[QCA_WLAN_VENDOR_ATTR_CONFIG_REDUCED_POWER_SCAN_MODE] = {
+		.type = NLA_U8},
 };
 
 #define WLAN_MAX_LINK_ID 15
@@ -13551,7 +13553,7 @@ hdd_set_independent_configuration(struct wlan_hdd_link_info *link_info,
 	uint32_t id;
 	struct nlattr *attr;
 	independent_setter_fn cb;
-	int errno = 0;
+	int errno = -ENOTSUPP;
 	int ret;
 
 	for (i = 0; i < QDF_ARRAY_SIZE(independent_setters); i++) {
@@ -13622,7 +13624,7 @@ hdd_set_interdependent_configuration(struct wlan_hdd_link_info *link_info,
 {
 	uint32_t i;
 	interdependent_setter_fn cb;
-	int errno = 0;
+	int errno = -ENOTSUPP;
 	int ret;
 
 	for (i = 0; i < QDF_ARRAY_SIZE(interdependent_setters); i++) {
