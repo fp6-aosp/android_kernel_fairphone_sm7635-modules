@@ -8993,6 +8993,8 @@ wlan_hdd_cfg80211_wifi_set_reorder_timeout(struct wlan_hdd_link_info *link_info,
 			hdd_err("one of the timeout value is not in range");
 			ret_val = -EINVAL;
 		}
+	} else {
+		ret_val = -ENOTSUPP;
 	}
 
 	return ret_val;
@@ -9049,6 +9051,8 @@ wlan_hdd_cfg80211_wifi_set_rx_blocksize(struct wlan_hdd_link_info *link_info,
 			hdd_err("window size val is not in range");
 			ret_val = -EINVAL;
 		}
+	} else {
+		ret_val = -ENOTSUPP;
 	}
 
 	return ret_val;
@@ -9206,7 +9210,7 @@ static int hdd_config_phy_mode(struct wlan_hdd_link_info *link_info,
 	struct nlattr *ifindex_attr = tb[QCA_WLAN_VENDOR_ATTR_CONFIG_IFINDEX];
 
 	if (!phy_mode_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	vendor_phy_mode = nla_get_u32(phy_mode_attr);
 	if (!ifindex_attr)
@@ -9245,7 +9249,7 @@ static int hdd_config_peer_ampdu(struct wlan_hdd_link_info *link_info,
 	uint16_t cfg_val;
 
 	if (!ampdu_cnt_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	if (adapter->device_mode == QDF_SAP_MODE ||
 	    adapter->device_mode == QDF_P2P_GO_MODE)
@@ -9420,7 +9424,7 @@ static int hdd_config_access_policy(struct wlan_hdd_link_info *link_info,
 
 	/* nothing to do if neither attribute is present */
 	if (!ielist_attr && !policy_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	/* if one is present, both must be present */
 	if (!ielist_attr || !policy_attr) {
@@ -9471,7 +9475,7 @@ static int hdd_config_mpdu_aggregation(struct wlan_hdd_link_info *link_info,
 
 	/* nothing to do if neither attribute is present */
 	if (!tx_attr && !rx_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	/* if one is present, both must be present */
 	if (!tx_attr || !rx_attr) {
@@ -9516,7 +9520,7 @@ static int hdd_config_msdu_aggregation(struct wlan_hdd_link_info *link_info,
 
 	/* nothing to do if neither attribute is present */
 	if (!tx_attr && !rx_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	/* if one is present, both must be present */
 	if (!tx_attr || !rx_attr) {
@@ -9652,7 +9656,7 @@ static int hdd_config_vdev_chains(struct wlan_hdd_link_info *link_info,
 		tb[QCA_WLAN_VENDOR_ATTR_CONFIG_NUM_RX_CHAINS];
 
 	if (!tx_attr && !rx_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	/* if one is present, both must be present */
 	if (!tx_attr || !rx_attr) {
@@ -9683,7 +9687,7 @@ static int hdd_config_tx_rx_nss(struct wlan_hdd_link_info *link_info,
 		tb[QCA_WLAN_VENDOR_ATTR_CONFIG_RX_NSS];
 
 	if (!tx_attr && !rx_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	/* if one is present, both must be present */
 	if (!tx_attr || !rx_attr) {
@@ -9733,14 +9737,14 @@ static int hdd_process_generic_set_cmd(struct wlan_hdd_link_info *link_info,
 	if (tb[QCA_WLAN_VENDOR_ATTR_CONFIG_GENERIC_COMMAND])
 		return hdd_son_send_set_wifi_generic_command(wiphy, wdev, tb);
 
-	return 0;
+	return -ENOTSUPP;
 }
 #else
 static inline int
 hdd_process_generic_set_cmd(struct wlan_hdd_link_info *link_info,
 			    struct nlattr *tb[])
 {
-	return 0;
+	return -ENOTSUPP;
 }
 #endif
 
@@ -9756,7 +9760,7 @@ static int hdd_config_ani(struct wlan_hdd_link_info *link_info,
 		tb[QCA_WLAN_VENDOR_ATTR_CONFIG_ANI_LEVEL];
 
 	if (!ani_setting_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	ani_setting_type = nla_get_u8(ani_setting_attr);
 	if (ani_setting_type != QCA_WLAN_ANI_SETTING_AUTO &&
@@ -9820,7 +9824,7 @@ static int hdd_config_ant_div_period(struct wlan_hdd_link_info *link_info,
 
 	/* nothing to do if neither attribute is present */
 	if (!probe_attr && !stay_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	/* if one is present, both must be present */
 	if (!probe_attr || !stay_attr) {
@@ -9856,7 +9860,7 @@ static int hdd_config_ant_div_snr_weight(struct wlan_hdd_link_info *link_info,
 
 	/* nothing to do if none of the attributes are present */
 	if (!mgmt_attr && !data_attr && !ack_attr)
-		return 0;
+		return -ENOTSUPP;
 
 	/* if one is present, all must be present */
 	if (!mgmt_attr || !data_attr || !ack_attr) {
@@ -10062,7 +10066,7 @@ static int hdd_config_power(struct wlan_hdd_link_info *link_info,
 
 	if (!power_attr && !opm_attr) {
 		hdd_err_rl("power attr and opm attr is null");
-		return 0;
+		return -ENOTSUPP;
 	}
 
 
@@ -11302,7 +11306,7 @@ skip_mlo:
 	chn_bd = tb[QCA_WLAN_VENDOR_ATTR_CONFIG_CHANNEL_WIDTH];
 
 	if (!chn_bd)
-		return 0;
+		return -ENOTSUPP;
 
 	nl80211_chwidth = nla_get_u8(chn_bd);
 	chwidth = hdd_nl80211_chwidth_to_chwidth(nl80211_chwidth);
@@ -13553,8 +13557,8 @@ hdd_set_independent_configuration(struct wlan_hdd_link_info *link_info,
 	uint32_t id;
 	struct nlattr *attr;
 	independent_setter_fn cb;
-	int errno = -ENOTSUPP;
-	int ret;
+	int errno = 0;
+	int ret = -ENOTSUPP;
 
 	for (i = 0; i < QDF_ARRAY_SIZE(independent_setters); i++) {
 		id = independent_setters[i].id;
@@ -13569,6 +13573,9 @@ hdd_set_independent_configuration(struct wlan_hdd_link_info *link_info,
 		if (ret)
 			errno = ret;
 	}
+
+	if (ret == -ENOTSUPP)
+		errno = ret;
 
 	return errno;
 }
@@ -13624,15 +13631,22 @@ hdd_set_interdependent_configuration(struct wlan_hdd_link_info *link_info,
 {
 	uint32_t i;
 	interdependent_setter_fn cb;
-	int errno = -ENOTSUPP;
-	int ret;
+	int errno = 0;
+	int ret = -ENOTSUPP;
 
 	for (i = 0; i < QDF_ARRAY_SIZE(interdependent_setters); i++) {
 		cb = interdependent_setters[i];
 		ret = cb(link_info, tb);
-		if (ret)
+		if (ret == -ENOTSUPP) {
+			continue;
+		} else {
 			errno = ret;
+			break;
+		}
 	}
+
+	if (ret)
+		errno = ret;
 
 	return errno;
 }
@@ -13684,7 +13698,7 @@ __wlan_hdd_cfg80211_wifi_configuration_set(struct wiphy *wiphy,
 		errno = ret;
 
 	ret = hdd_set_interdependent_configuration(adapter->deflink, tb);
-	if (ret)
+	if (errno == -ENOTSUPP)
 		errno = ret;
 
 	return errno;
