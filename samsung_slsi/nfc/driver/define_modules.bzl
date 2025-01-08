@@ -9,6 +9,7 @@ def define_modules(target, variant):
     if target in ["pineapple", "fps"]:
        copts.append("-DCONFIG_SEC_NFC_IF_I2C")
        copts.append("-DCONFIG_SEC_NFC_PRODUCT_N5")
+       copts.append("-DCONFIG_SEC_NFC_GPIO_CLK_AWAKE")
        deps += ["//vendor/qcom/opensource/securemsm-kernel:smcinvoke_kernel_headers",
                 "//vendor/qcom/opensource/securemsm-kernel:{}_smcinvoke_dlkm".format(tv)
        ]
