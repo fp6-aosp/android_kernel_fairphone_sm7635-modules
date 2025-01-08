@@ -50,6 +50,10 @@
 #endif
 #include <linux/of_gpio.h>
 #include <linux/clk.h>
+#ifdef CONFIG_SEC_NFC_GPIO_CLK_AWAKE
+#include <linux/pinctrl/qcom-pinctrl.h>
+#include <linux/of.h>
+#endif
 
 #ifndef CONFIG_SEC_NFC_IF_I2C
 struct sec_nfc_i2c_info {};
@@ -339,6 +343,10 @@ int sec_nfc_i2c_probe(struct i2c_client *client)
     struct sec_nfc_platform_data *pdata = info->pdata;
     int ret;
 
+#ifdef CONFIG_SEC_NFC_GPIO_CLK_AWAKE
+    unsigned int clkreq_gpio = 0;
+#endif
+
     pr_info("%s: start: %p\n", __func__, info);
 
     info->i2c_info.buflen = SEC_NFC_MAX_BUFFER_SIZE;
@@ -354,6 +362,24 @@ int sec_nfc_i2c_probe(struct i2c_client *client)
     i2c_set_clientdata(client, info);
 
     info->dev = dev;
+
+#ifdef CONFIG_SEC_NFC_GPIO_CLK_AWAKE
+    pr_err("%s: Read clkreq gipo number", __func__);
+    ret = of_property_read_u32_index(client->dev.of_node, "sec-nfc,clk_req-gpio", 1, &clkreq_gpio);
+    if (ret < 0) {
+        pr_err("%s: Failed to read clkreq gipo number, ret: %d\n", __func__, ret);
+    } else {
+        pr_err("%s: Success to read clkreq gipo number: %d\n", __func__, clkreq_gpio);
+
+        pr_err("%s: Setup clkreq gpio as wakeup capable", __func__);
+        ret = msm_gpio_mpm_wake_set(clkreq_gpio, true);
+        if (ret < 0) {
+            pr_err("%s: Failed to setup clkreq gpio %d as wakeup capable, ret: %d\n", __func__, clkreq_gpio, ret);
+        } else {
+            pr_err("%s: Success to setup clkreq gpio %d as wakeup capable\n", __func__, clkreq_gpio);
+        }
+    }
+#endif
 
     ret = gpio_request(pdata->irq, "nfc_int");
     if (ret) {
