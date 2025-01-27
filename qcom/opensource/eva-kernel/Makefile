@@ -1,4 +1,7 @@
 KBUILD_OPTIONS+= EVA_ROOT=$(KERNEL_SRC)/$(M)
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../dsp-kernel/Module.symvers
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../mmrm-driver/Module.symvers
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../synx-kernel/Module.symvers
 
 KBUILD_EXTRA_SYMBOLS := \
     $(OUT_DIR)/../sm7635-modules/qcom/opensource/mmrm-driver/Module.symvers \
