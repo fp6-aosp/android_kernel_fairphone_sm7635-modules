@@ -39,6 +39,7 @@ KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
 
 KBUILD_OPTIONS := RMNET_CORE_ROOT=$(PWD)
 KBUILD_OPTIONS += MODNAME?=rmnet_core
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS=$(M)/../../datarmnet-ext/mem/Module.symvers
 
 KBUILD_EXTRA_SYMBOLS := \
     $(OUT_DIR)/../sm7635-modules/qcom/opensource/datarmnet-ext/mem/Module.symvers \
