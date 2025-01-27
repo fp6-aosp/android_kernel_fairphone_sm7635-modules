@@ -2,16 +2,14 @@
 
 DISPLAY_SELECT := CONFIG_DRM_MSM=m
 
-KBUILD_EXTRA_SYMBOLS := \
-    $(OUT_DIR)/../sm7635-modules/fairphone/emkit/Module.symvers \
-    $(OUT_DIR)/../sm7635-modules/qcom/opensource/mm-drivers/msm_ext_display/Module.symvers \
-    $(OUT_DIR)/../sm7635-modules/qcom/opensource/mm-drivers/sync_fence/Module.symvers \
-    $(OUT_DIR)/../sm7635-modules/qcom/opensource/securemsm-kernel/Module.symvers
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../../../../fairphone/emkit/Module.symvers
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../../mm-drivers/msm_ext_display/Module.symvers
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../../mm-drivers/sync_fence/Module.symvers
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../../securemsm-kernel/Module.symvers
 
 ifneq ($(BOARD_PLATFORM), volcano)
-KBUILD_EXTRA_SYMBOLS += \
-    $(OUT_DIR)/../sm7635-modules/qcom/opensource/mm-drivers/hw_fence/Module.symvers \
-    $(OUT_DIR)/../sm7635-modules/qcom/opensource/mmrm-driver/Module.symvers
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../../mm-drivers/hw_fence/Module.symvers
+KBUILD_OPTIONS += KBUILD_EXTRA_SYMBOLS+=$(M)/../../mmrm-driver/Module.symvers
 endif
 
 KBUILD_OPTIONS += DISPLAY_ROOT=$(KERNEL_SRC)/$(M)/../
