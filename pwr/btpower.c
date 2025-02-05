@@ -196,6 +196,8 @@ static struct vreg_data bt_vregs_info_wcn6450[] = {
 		{BT_VDD_RFA2_LDO, BT_VDD_RFA2_LDO_CURRENT}},
 	{NULL, "qcom,bt-vdd-pa",	   3300000, 3300000, 0, false, true,
 		{BT_VDD_PA_LDO, BT_VDD_PA_LDO_CURRENT}},
+	{NULL, "qcom,bt-vdd-pa-5g",	   3300000, 3300000, 0, false, true,
+		{BT_VDD_PA_LDO, BT_VDD_PA_LDO_CURRENT}},
 };
 
 // Regulator structure for kiwi BT SoC series
