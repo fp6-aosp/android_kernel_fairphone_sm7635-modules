@@ -3,15 +3,19 @@
 LOCAL_PATH := $(call my-dir)
 
 # Build/Package only in case of supported target
-ifeq ($(call is-board-platform-in-list,taro kalama pineapple blair pitti volcano niobe anorak61 neo61), true)
+ifeq ($(call is-board-platform-in-list,taro kalama pineapple blair pitti volcano niobe anorak61 neo61 seraph), true)
 
 BT_SELECT := CONFIG_MSM_BT_POWER=m
 ifneq ($(call is-board-platform-in-list, niobe anorak61 neo61 pitti), true)
 BT_SELECT += CONFIG_BTFM_CODEC=m
 BT_SELECT += CONFIG_BTFM_SWR=m
 endif
-BT_SELECT += CONFIG_BTFM_SLIM=m
+
+ifneq ($(call is-board-platform-in-list, niobe anorak61 neo61 pitti seraph), true)
 BT_SELECT += CONFIG_I2C_RTC6226_QCA=m
+endif
+
+BT_SELECT += CONFIG_BTFM_SLIM=m
 
 ifeq ($(TARGET_KERNEL_DLKM_SECURE_MSM_OVERRIDE), true)
 ifeq ($(ENABLE_PERIPHERAL_STATE_UTILS), true)
@@ -27,7 +31,9 @@ LOCAL_MODULE_KO_DIRS += btfmcodec/btfmcodec.ko
 LOCAL_MODULE_KO_DIRS += soundwire/bt_fm_swr.ko
 endif
 LOCAL_MODULE_KO_DIRS += slimbus/bt_fm_slim.ko
+ifneq ($(call is-board-platform-in-list, niobe anorak61 neo61 pitti seraph), true)
 LOCAL_MODULE_KO_DIRS += rtc6226/radio-i2c-rtc6226-qca.ko
+endif
 
 
 # This makefile is only for DLKM
