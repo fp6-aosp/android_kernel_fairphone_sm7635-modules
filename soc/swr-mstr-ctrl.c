@@ -570,6 +570,17 @@ exit:
 	return ret;
 }
 
+static bool swrm_first_after_clk_enabled(struct swr_mstr_ctrl *swrm)
+{
+	bool ret = false;
+
+	mutex_lock(&swrm->clklock);
+	ret = (swrm->clk_ref_count == 1) ? true:false;
+	mutex_unlock(&swrm->clklock);
+
+	return ret;
+}
+
 static int swrm_clk_request(struct swr_mstr_ctrl *swrm, bool enable)
 {
 	int ret = 0;
@@ -2141,8 +2152,6 @@ static int swrm_slvdev_datapath_control(struct swr_master *master, bool enable)
 		dev_dbg(&master->dev, "%s: pm_runtime auto suspend triggered\n",
 			__func__);
 		pm_runtime_mark_last_busy(swrm->dev);
-		if (!enable)
-			pm_runtime_set_autosuspend_delay(swrm->dev, 80);
 		pm_runtime_put_autosuspend(swrm->dev);
 	}
 exit:
@@ -2417,12 +2426,32 @@ static void swrm_process_change_enum_slave_status(struct swr_mstr_ctrl *swrm)
 	u8 num_enum_devs = 0;
 	u8 enum_devnum[SWR_MAX_DEV_NUM][2];
 	u8 devnum = 0;
+	u8 reset = 0;
+	struct swr_device *swr_dev;
+	struct swr_master *mstr = &swrm->master;
 
 	status = swr_master_read(swrm, SWRM_MCP_SLV_STATUS);
 	if (status == swrm->slave_status) {
 		dev_dbg(swrm->dev,
 				"%s: No change in slave status: 0x%x\n",
 				__func__, status);
+
+	/* This change is a workaround to enable the slave
+	 * to handle any unexpected error condition.
+	 */
+		if (swrm->master_id == MASTER_ID_TX) {
+			list_for_each_entry(swr_dev, &mstr->devices, dev_list) {
+				reset = swr_reset_device(swr_dev);
+				if (reset != -ENODEV && reset != -EINVAL) {
+					dev_dbg_ratelimited(swrm->dev,
+						"%s Slave Reset Done!!\n", __func__);
+					reset = 0;
+				} else {
+					dev_dbg_ratelimited(swrm->dev,
+						"%s Slave Reset failed!!\n", __func__);
+				}
+			}
+		}
 		return;
 	}
 
@@ -2552,8 +2581,8 @@ handle_irq:
 				__func__);
 			break;
 		case SWRM_INTERRUPT_STATUS_CHANGE_ENUM_SLAVE_STATUS:
-			swrm_enable_slave_irq(swrm);
 			mutex_lock(&enumeration_lock);
+			swrm_enable_slave_irq(swrm);
 			swrm_process_change_enum_slave_status(swrm);
 			mutex_unlock(&enumeration_lock);
 			break;
@@ -2699,8 +2728,10 @@ handle_irq:
 		SWRM_INTERRUPT_CLEAR), 0x0);
 	if (swrm->enable_slave_irq) {
 		/* Enable slave irq here */
+		mutex_lock(&enumeration_lock);
 		swrm_enable_slave_irq(swrm);
 		swrm->enable_slave_irq = false;
+		mutex_unlock(&enumeration_lock);
 	}
 
 	intr_sts = swr_master_read(swrm, REGISTER_ADDRESS(swrm->version_index,
@@ -2884,10 +2915,11 @@ static int swrm_get_logical_dev_num(struct swr_master *mstr, u64 dev_id,
 		dev_err(swrm->dev,
 				"%s: device 0x%llx is not ready\n",
 				__func__, dev_id);
-	mutex_unlock(&enumeration_lock);
 
+	mutex_unlock(&enumeration_lock);
 	pm_runtime_mark_last_busy(swrm->dev);
 	pm_runtime_put_autosuspend(swrm->dev);
+
 	return ret;
 }
 
@@ -3768,17 +3800,23 @@ static int swrm_runtime_resume(struct device *dev)
 					goto exit;
 				}
 			}
-			swr_master_write(swrm, SWRM_COMP_SW_RESET, 0x01);
-			swr_master_write(swrm, SWRM_COMP_SW_RESET, 0x01);
-			swr_master_write(swrm, SWRM_MCP_BUS_CTRL, 0x01);
-			swrm_master_init(swrm);
-			/* wait for hw enumeration to complete */
-			usleep_range(100, 105);
-			if (!swrm_check_link_status(swrm, 0x1))
-				dev_dbg(dev, "%s:failed in connecting, ssr?\n",
+
+			if (swrm_first_after_clk_enabled(swrm)) {
+				swr_master_write(swrm, SWRM_COMP_SW_RESET, 0x01);
+				swr_master_write(swrm, SWRM_COMP_SW_RESET, 0x01);
+				swr_master_write(swrm, SWRM_MCP_BUS_CTRL, 0x01);
+				swrm_master_init(swrm);
+
+				/* wait for hw enumeration to complete */
+				usleep_range(100, 105);
+				if (!swrm_check_link_status(swrm, 0x1))
+					dev_dbg(dev, "%s:failed in connecting, ssr?\n",
 					__func__);
-			swrm_cmd_fifo_wr_cmd(swrm, 0x4, 0xF, get_cmd_id(swrm),
+
+				swrm_cmd_fifo_wr_cmd(swrm, 0x4, 0xF, get_cmd_id(swrm),
 						SWRS_SCP_INT_STATUS_MASK_1);
+			}
+
 			if (swrm->state == SWR_MSTR_SSR) {
 				mutex_unlock(&swrm->reslock);
 				enable_bank_switch(swrm, 0, SWR_ROW_50, SWR_MIN_COL);
@@ -3882,7 +3920,10 @@ static int swrm_runtime_suspend(struct device *dev)
 			if (swrm->state == SWR_MSTR_SSR)
 				goto chk_lnk_status;
 			mutex_unlock(&swrm->reslock);
-			enable_bank_switch(swrm, 0, SWR_ROW_50, SWR_MIN_COL);
+
+			if (swrm->master_id != MASTER_ID_BT)
+				enable_bank_switch(swrm, 0, SWR_ROW_50, SWR_MIN_COL);
+
 			mutex_lock(&swrm->reslock);
 			swrm_clk_pause(swrm);
 			swr_master_write(swrm, SWRM_COMP_CFG, 0x00);
@@ -3959,7 +4000,6 @@ exit:
 	mutex_unlock(&swrm->runtime_lock);
 	dev_dbg(dev, "%s: pm_runtime: suspend done state: %d\n",
 		__func__, swrm->state);
-	pm_runtime_set_autosuspend_delay(dev, auto_suspend_timer);
 	return ret;
 }
 #endif /* CONFIG_PM */
