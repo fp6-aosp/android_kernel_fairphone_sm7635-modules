@@ -1129,7 +1129,6 @@ struct ipa3_ep_context {
 	u32 dflt_flt6_rule_hdl;
 	u32 dl_flt4_rule_hdl;
 	u32 dl_flt6_rule_hdl;
-	u32 rtp_flt4_rule_hdls[MAX_STREAMS];
 	bool skip_ep_cfg;
 	bool keep_ipa_awake;
 	struct ipa3_wlan_stats wstats;
@@ -2450,6 +2449,7 @@ struct ipa3_context {
 	u32 rtp_rt4_tbl_hdls[MAX_STREAMS];
 	u32 rtp_rt4_tbl_idxs[MAX_STREAMS];
 	u32 rtp_rt4_rule_hdls[MAX_STREAMS];
+	u32 rtp_flt4_rule_hdls[MAX_STREAMS];
 	bool ipa_endp_delay_wa;
 	bool lan_coal_enable;
 	bool ipa_fltrt_not_hashable;
