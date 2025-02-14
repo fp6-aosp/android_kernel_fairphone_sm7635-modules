@@ -3457,7 +3457,8 @@ static int hdd_softap_unpack_ie(mac_handle_t mac_handle,
 	return QDF_STATUS_SUCCESS;
 }
 
-bool hdd_is_any_sta_connecting(struct hdd_context *hdd_ctx)
+bool hdd_is_any_sta_connecting(struct hdd_context *hdd_ctx,
+			       enum QDF_OPMODE op_mode)
 {
 	struct hdd_adapter *adapter = NULL, *next_adapter = NULL;
 	struct hdd_station_ctx *sta_ctx;
@@ -3482,7 +3483,16 @@ bool hdd_is_any_sta_connecting(struct hdd_context *hdd_ctx)
 
 			is_connecting = hdd_cm_is_connecting(link_info);
 
-			key_exchng_in_prog =
+			/* In case of P2P GO + STA/CLI concurrency, when EAPOL
+			 * is in progress for STA/CLI, the P2P GO will still be
+			 * in NOA and if CSA is allowed then CSA frames won't
+			 * go over the air as P2P GO is in NOA.
+			 * In case of SAP, it doesn't need to check the EAPOL
+			 * in progress as the STA/CLI channel will be already
+			 * decided after getting connect complete indication.
+			 */
+			if (op_mode == QDF_P2P_GO_MODE)
+				key_exchng_in_prog =
 					sme_is_sta_key_exchange_in_progress(
 							hdd_ctx->mac_handle,
 							link_info->vdev_id);
@@ -3558,7 +3568,7 @@ int hdd_softap_set_channel_change(struct net_device *dev, int target_chan_freq,
 	 * cannot do CSA as it won't be able to send CSA frames during NOA
 	 * period
 	 */
-	if (hdd_is_any_sta_connecting(hdd_ctx) ||
+	if (hdd_is_any_sta_connecting(hdd_ctx, adapter->device_mode) ||
 	    (adapter->device_mode == QDF_P2P_GO_MODE &&
 	     ucfg_p2p_is_p2p_go_noa_in_progress(hdd_ctx->pdev,
 						link_info->vdev_id))) {
