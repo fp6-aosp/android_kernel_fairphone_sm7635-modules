@@ -588,6 +588,10 @@ static tVERSION get_image_version(tIMAGE* image) {
     memcpy(ver.version, image->binary + 0x10, VERSION_LEN_FW);
     OSI_logd("FW version (%p): %x.%x.%x", image, ver.version[0],
              ver.version[1], ver.version[2]);
+
+    char fw_version[100];
+    sprintf(fw_version, "%x.%x.%x", ver.version[0], ver.version[1], ver.version[2]);
+    property_set("vendor.nfc.fw.version", fw_version);
   } else if (image->type == IMAGE_TYPE_RF_REG) {
     ver.length = VERSION_LEN_RF;
     // p = image->binary + image->binary_length - 16; // Get meta data
