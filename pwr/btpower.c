@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
  * Copyright (c) 2016-2021, The Linux Foundation. All rights reserved.
- * Copyright (c) 2021-2024 Qualcomm Innovation Center, Inc. All rights reserved.
+ * Copyright (c) 2021-2025 Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 /*
@@ -107,6 +107,8 @@ enum power_src_pos {
 	BT_VDD_AON_LDO,
 	BT_VDD_DIG_LDO,
 	BT_VDD_RFA1_LDO,
+	BT_VDD_RFA1P3_LDO,
+	BT_VDD_RFA1P9_LDO,
 	BT_VDD_RFA2_LDO,
 	BT_VDD_ASD_LDO,
 	BT_VDD_XTAL_LDO,
@@ -115,6 +117,7 @@ enum power_src_pos {
 	BT_VDD_IO_LDO,
 	BT_VDD_LDO,
 	BT_VDD_RFA_0p8,
+	BT_VDD_RFA_0p9,
 	BT_VDD_RFACMN,
 	BT_VDD_ANT_LDO,
 	// these indexes GPIOs/regs value are fetched during crash.
@@ -123,6 +126,8 @@ enum power_src_pos {
 	BT_VDD_AON_LDO_CURRENT,
 	BT_VDD_DIG_LDO_CURRENT,
 	BT_VDD_RFA1_LDO_CURRENT,
+	BT_VDD_RFA1P3_LDO_CURRENT,
+	BT_VDD_RFA1P9_LDO_CURRENT,
 	BT_VDD_RFA2_LDO_CURRENT,
 	BT_VDD_ASD_LDO_CURRENT,
 	BT_VDD_XTAL_LDO_CURRENT,
@@ -131,6 +136,7 @@ enum power_src_pos {
 	BT_VDD_IO_LDO_CURRENT,
 	BT_VDD_LDO_CURRENT,
 	BT_VDD_RFA_0p8_CURRENT,
+	BT_VDD_RFA_0p9_CURRENT,
 	BT_VDD_RFACMN_CURRENT,
 	BT_VDD_IPA_2p2,
 	BT_VDD_IPA_2p2_CURRENT,
@@ -260,6 +266,24 @@ static struct pwr_data bt_vreg_info_wcn399x = {
 	.bt_num_vregs = 5,
 };
 
+// Regulator structure for Brahma BT SoC series
+static struct vreg_data platform_vregs_info_wcn786x[] = {
+	{NULL, "qcom,bt-vdd18-aon",      1620000, 2000000, 0, false, true,
+		{BT_VDD_LDO, BT_VDD_LDO_CURRENT}},
+	{NULL, "qcom,bt-vdd12-io",      320000, 2000000, 0, false, true,
+		{BT_VDD_IO_LDO, BT_VDD_IO_LDO_CURRENT}},
+	{NULL, "qcom,bt-vdd-dig",      700000,  2100000,  0, false, true,
+		{BT_VDD_DIG_LDO, BT_VDD_DIG_LDO_CURRENT}},
+	{NULL, "qcom,bt-vdd-aon",     700000,  2100000,  0, false, true,
+		{BT_VDD_AON_LDO, BT_VDD_AON_LDO_CURRENT}},
+	{NULL, "qcom,bt-vdd-rfaOp9",  700000,  2100000,  0, false, true,
+		{BT_VDD_RFA_0p9, BT_VDD_RFA_0p9_CURRENT}},
+	{NULL, "qcom,bt-vdd-rfa1p3",     1250000, 2100000, 0, false, true,
+		{BT_VDD_RFA1P3_LDO, BT_VDD_RFA1P3_LDO_CURRENT}},
+	{NULL, "qcom,bt-vdd-rfa1p9",     1850000, 2100000, 0, false, true,
+		{BT_VDD_RFA1P9_LDO, BT_VDD_RFA1P9_LDO_CURRENT}},
+};
+
 static struct pwr_data bt_vreg_info_qca6174 = {
 	.compatible = "qcom,qca6174",
 	.bt_vregs = bt_vregs_info_qca61x4_937x,
@@ -318,6 +342,12 @@ static struct pwr_data bt_vreg_info_peach = {
 	//.bt_num_vregs = ARRAY_SIZE(platform_vregs_info),
 };
 
+static struct pwr_data vreg_info_wcn786x = {
+	.compatible = "qcom,wcn788x",
+	.platform_vregs = platform_vregs_info_wcn786x,
+	.platform_num_vregs = ARRAY_SIZE(platform_vregs_info_wcn786x),
+};
+
 static const struct of_device_id bt_power_match_table[] = {
 	{	.compatible = "qcom,qca6174", .data = &bt_vreg_info_qca6174},
 	{	.compatible = "qcom,wcn3990", .data = &bt_vreg_info_wcn399x},
@@ -327,9 +357,10 @@ static const struct of_device_id bt_power_match_table[] = {
 	{	.compatible = "qcom,kiwi-no-share-ant-power",
 			.data = &bt_vreg_info_kiwi_no_share_ant_power},
 	{	.compatible = "qcom,wcn6750-bt", .data = &bt_vreg_info_wcn6750},
-	{       .compatible = "qcom,wcn6450-bt", .data = &bt_vreg_info_wcn6450},
+	{   .compatible = "qcom,wcn6450-bt", .data = &bt_vreg_info_wcn6450},
 	{	.compatible = "qcom,bt-qca-converged", .data = &bt_vreg_info_converged},
 	{	.compatible = "qcom,peach-bt", .data = &bt_vreg_info_peach},
+	{	.compatible = "qcom,wcn788x", .data = &vreg_info_wcn786x},
 	{},
 };
 
@@ -927,7 +958,7 @@ static int bt_regulators_pwr(int pwr_state)
 	bt_num_vregs =  pwr_data->bt_num_vregs;
 
 	if (!bt_num_vregs) {
-		pr_warn("%s: not avilable to %s\n",
+		pr_warn("%s: not available to %s\n",
 			__func__, ConvertRegisterModeToString(pwr_state));
 		return 0;
 	}
@@ -1028,7 +1059,7 @@ static int uwb_regulators_pwr(int pwr_state)
 	uwb_num_vregs =  pwr_data->uwb_num_vregs;
 
 	if (!uwb_num_vregs) {
-		pr_warn("%s: not avilable to %s\n",
+		pr_warn("%s: not available to %s\n",
 			__func__, ConvertRegisterModeToString(pwr_state));
 		return 0;
 	}
@@ -1641,7 +1672,9 @@ static int bt_power_probe(struct platform_device *pdev)
 	pwr_data->pdev = pdev;
 
 	pwr_data->is_ganges_dt = of_property_read_bool(pdev->dev.of_node,
-							"qcom,peach-bt");
+							"qcom,peach-bt") ||
+							of_property_read_bool(pdev->dev.of_node,
+							"qcom,wcn786x");
 
 	pr_info("%s: is_ganges_dt = %d\n", __func__, pwr_data->is_ganges_dt);
 
