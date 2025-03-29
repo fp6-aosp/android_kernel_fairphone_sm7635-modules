@@ -107,8 +107,6 @@ enum power_src_pos {
 	BT_VDD_AON_LDO,
 	BT_VDD_DIG_LDO,
 	BT_VDD_RFA1_LDO,
-	BT_VDD_RFA1P3_LDO,
-	BT_VDD_RFA1P9_LDO,
 	BT_VDD_RFA2_LDO,
 	BT_VDD_ASD_LDO,
 	BT_VDD_XTAL_LDO,
@@ -117,7 +115,6 @@ enum power_src_pos {
 	BT_VDD_IO_LDO,
 	BT_VDD_LDO,
 	BT_VDD_RFA_0p8,
-	BT_VDD_RFA_0p9,
 	BT_VDD_RFACMN,
 	BT_VDD_ANT_LDO,
 	// these indexes GPIOs/regs value are fetched during crash.
@@ -126,8 +123,6 @@ enum power_src_pos {
 	BT_VDD_AON_LDO_CURRENT,
 	BT_VDD_DIG_LDO_CURRENT,
 	BT_VDD_RFA1_LDO_CURRENT,
-	BT_VDD_RFA1P3_LDO_CURRENT,
-	BT_VDD_RFA1P9_LDO_CURRENT,
 	BT_VDD_RFA2_LDO_CURRENT,
 	BT_VDD_ASD_LDO_CURRENT,
 	BT_VDD_XTAL_LDO_CURRENT,
@@ -136,7 +131,6 @@ enum power_src_pos {
 	BT_VDD_IO_LDO_CURRENT,
 	BT_VDD_LDO_CURRENT,
 	BT_VDD_RFA_0p8_CURRENT,
-	BT_VDD_RFA_0p9_CURRENT,
 	BT_VDD_RFACMN_CURRENT,
 	BT_VDD_IPA_2p2,
 	BT_VDD_IPA_2p2_CURRENT,
@@ -266,24 +260,6 @@ static struct pwr_data bt_vreg_info_wcn399x = {
 	.bt_num_vregs = 5,
 };
 
-// Regulator structure for Brahma BT SoC series
-static struct vreg_data platform_vregs_info_wcn786x[] = {
-	{NULL, "qcom,bt-vdd18-aon",      1620000, 2000000, 0, false, true,
-		{BT_VDD_LDO, BT_VDD_LDO_CURRENT}},
-	{NULL, "qcom,bt-vdd12-io",      320000, 2000000, 0, false, true,
-		{BT_VDD_IO_LDO, BT_VDD_IO_LDO_CURRENT}},
-	{NULL, "qcom,bt-vdd-dig",      700000,  2100000,  0, false, true,
-		{BT_VDD_DIG_LDO, BT_VDD_DIG_LDO_CURRENT}},
-	{NULL, "qcom,bt-vdd-aon",     700000,  2100000,  0, false, true,
-		{BT_VDD_AON_LDO, BT_VDD_AON_LDO_CURRENT}},
-	{NULL, "qcom,bt-vdd-rfaOp9",  700000,  2100000,  0, false, true,
-		{BT_VDD_RFA_0p9, BT_VDD_RFA_0p9_CURRENT}},
-	{NULL, "qcom,bt-vdd-rfa1p3",     1250000, 2100000, 0, false, true,
-		{BT_VDD_RFA1P3_LDO, BT_VDD_RFA1P3_LDO_CURRENT}},
-	{NULL, "qcom,bt-vdd-rfa1p9",     1850000, 2100000, 0, false, true,
-		{BT_VDD_RFA1P9_LDO, BT_VDD_RFA1P9_LDO_CURRENT}},
-};
-
 static struct pwr_data bt_vreg_info_qca6174 = {
 	.compatible = "qcom,qca6174",
 	.bt_vregs = bt_vregs_info_qca61x4_937x,
@@ -343,9 +319,9 @@ static struct pwr_data bt_vreg_info_peach = {
 };
 
 static struct pwr_data vreg_info_wcn786x = {
-	.compatible = "qcom,wcn788x",
-	.platform_vregs = platform_vregs_info_wcn786x,
-	.platform_num_vregs = ARRAY_SIZE(platform_vregs_info_wcn786x),
+	.compatible = "qcom,wcn786x",
+	.platform_vregs = bt_vregs_info_peach,
+	.platform_num_vregs = ARRAY_SIZE(bt_vregs_info_peach),
 };
 
 static const struct of_device_id bt_power_match_table[] = {
@@ -360,7 +336,7 @@ static const struct of_device_id bt_power_match_table[] = {
 	{   .compatible = "qcom,wcn6450-bt", .data = &bt_vreg_info_wcn6450},
 	{	.compatible = "qcom,bt-qca-converged", .data = &bt_vreg_info_converged},
 	{	.compatible = "qcom,peach-bt", .data = &bt_vreg_info_peach},
-	{	.compatible = "qcom,wcn788x", .data = &vreg_info_wcn786x},
+	{	.compatible = "qcom,wcn786x", .data = &vreg_info_wcn786x},
 	{},
 };
 
