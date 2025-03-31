@@ -463,6 +463,21 @@ void setSleepTimeout(int option, uint32_t timeout) {
   OSI_logd("Sleep timeout is %d ms", nfc_hal_info.cfg.sleep_timeout);
 }
 
+int nfc_hal_store_rta(void){
+  OSI_logt("enter;");
+
+  tNFC_NCI_PKT nci_pkt;
+  memset(&nci_pkt, 0, sizeof(tNFC_NCI_PKT));
+
+  nci_pkt.oct0 = 0x2F;
+  nci_pkt.oid = 0x30;
+  nci_pkt.len = 0x01;
+  nci_pkt.payload[0] = 0x01;
+
+  hal_nci_send(&nci_pkt);
+  return 0;
+}
+
 #ifdef INFC_1_1
 int nfc_hal_factory_reset(void) {
   OSI_logt("enter;");
@@ -477,6 +492,10 @@ int nfc_hal_closeForPowerOffCase(void) {
 #ifdef NFC_SEC_ESE_COLDRESET
   device_shutdown();
 #endif
+
+  nfc_hal_store_rta();
+  OSI_delay(5);
+
   //TO DO impl
   nfc_hal_close();
   OSI_logt("exit;");

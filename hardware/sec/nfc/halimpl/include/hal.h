@@ -305,6 +305,7 @@ int nfc_hal_pre_discover();
 int nfc_hal_close();
 int nfc_hal_control_granted();
 int nfc_hal_power_cycle();
+int nfc_hal_store_rta(void);
 // HIDL INfc 1.1
 int nfc_hal_factory_reset(void);
 int nfc_hal_closeForPowerOffCase(void);
