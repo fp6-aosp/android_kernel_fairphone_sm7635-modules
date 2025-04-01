@@ -94,7 +94,6 @@ def define_target_variant_modules(target, variant, registry, modules, config_opt
     for module in modules:
         rule_name = "{}_{}".format(kernel_build, module.name)
         module_srcs = _get_kernel_build_module_srcs(module, options, formatter)
-        print(rule_name)
         if not module_srcs:
             continue
 
