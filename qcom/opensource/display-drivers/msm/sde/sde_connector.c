@@ -203,8 +203,8 @@ static int sde_backlight_device_update_status(struct backlight_device *bd)
 			//bl_lvl = (int)(1.713 * brightness + 7);
 			bl_lvl = brightness + 7 + mult_frac(brightness, 713, 1000);
 		} else if(brightness > 2048 && brightness < 4095){
-			//bl_lvl = (int)(0.283 * brightness + 2936);
-			bl_lvl = mult_frac(brightness, 283, 1000) + 2936;
+			//bl_lvl = (int)(0.281 * brightness + 2940);
+			bl_lvl = mult_frac(brightness, 281, 1000) + 2940;
 		} else {
 			bl_lvl = 4094;
 		}
