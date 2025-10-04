@@ -2,10 +2,10 @@
 # Kbuild for the vl53L1 drivers.
 #
 
-ccflags-y	+= -I$(srctree)/$(src)/inc -I$(srctree)/$(src)
+ccflags-y	+= -I$(VL53L1_ROOT)/inc -I$(VL53L1_ROOT)
 
 
-ccflags-y	+= -I$(srctree)/$(src)/protected/inc
+ccflags-y	+= -I$(VL53L1_ROOT)/protected/inc
 ccflags-y	+= -DVL53L1_FULL_KERNEL
 
 
