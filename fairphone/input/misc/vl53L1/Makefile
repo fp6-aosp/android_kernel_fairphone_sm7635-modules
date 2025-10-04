@@ -1,12 +1,15 @@
-ifneq ($(KERNELRELEASE),)
-include Kbuild
+KERNEL_SRC ?= /lib/modules/$(shell uname -r)/build
 
-else
-KDIR ?= /lib/modules/`uname -r`/build
+M ?= $(shell pwd)
 
-default:
-	CONFIG_STMVL53L1=m $(MAKE) -C $(KDIR) M=$$PWD
+KBUILD_OPTIONS += VL53L1_ROOT=$(KERNEL_SRC)/$(M)
+KBUILD_OPTIONS += CONFIG_STMVL53L1=m
+
+all:
+	$(MAKE) -C $(KERNEL_SRC) M=$(M) modules $(KBUILD_OPTIONS)
+
+modules_install:
+	$(MAKE) INSTALL_MOD_STRIP=1 -C $(KERNEL_SRC) M=$(M) modules_install
+
 clean:
-	CONFIG_STMVL53L1=m $(MAKE) -C $(KDIR) M=$$PWD clean
-
-endif
+	$(MAKE) -C $(KERNEL_SRC) M=$(M) clean

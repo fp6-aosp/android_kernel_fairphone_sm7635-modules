@@ -66,6 +66,8 @@ LINUX_INC +=	-Iinclude/linux \
 		-Iinclude/linux/gunyah \
 		-Iinclude/linux/input
 
+LINUX_INC +=	-I$(TOUCH_ROOT)/../../../fairphone/emkit/include
+
 CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 	-DANI_LITTLE_BIT_ENDIAN \
 	-DDOT11F_LITTLE_ENDIAN_HOST \
@@ -79,6 +81,8 @@ CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 KBUILD_CPPFLAGS += $(CDEFINES)
 
 ccflags-y += $(LINUX_INC)
+
+KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/sm7635-modules/fairphone/emkit/Module.symvers
 
 ifeq ($(call cc-option-yn, -Wmaybe-uninitialized),y)
 EXTRA_CFLAGS += -Wmaybe-uninitialized
