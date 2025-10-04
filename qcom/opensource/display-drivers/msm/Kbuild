@@ -75,6 +75,8 @@ LINUX_INC +=	-I$(DISPLAY_ROOT) \
 	-I$(DISPLAY_ROOT)/msm/sde \
 	-I$(DISPLAY_ROOT)/include/uapi/display \
 
+LINUX_INC +=	-I$(DISPLAY_ROOT)/../../../fairphone/emkit/include
+
 CDEFINES +=	-DANI_LITTLE_BYTE_ENDIAN \
 	-DANI_LITTLE_BIT_ENDIAN \
 	-DDOT11F_LITTLE_ENDIAN_HOST \
@@ -93,6 +95,7 @@ ifeq ($(call cc-option-yn, -Wmaybe-uninitialized),y)
 EXTRA_CFLAGS += -Wmaybe-uninitialized
 endif
 
+KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/sm7635-modules/fairphone/emkit/Module.symvers
 KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/sm7635-modules/qcom/opensource/display-drivers/hdcp/Module.symvers
 KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/sm7635-modules/qcom/opensource/display-drivers/msm/Module.symvers
 
