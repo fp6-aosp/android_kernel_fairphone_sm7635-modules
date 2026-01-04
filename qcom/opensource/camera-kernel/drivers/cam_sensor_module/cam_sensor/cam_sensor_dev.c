@@ -798,7 +798,11 @@ int deviceinfo_init(void)
 {
     int ret = -1;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+    deviceinfo_class = class_create("deviceinfo");
+#else
     deviceinfo_class = class_create(THIS_MODULE, "deviceinfo");
+#endif
     if (IS_ERR(deviceinfo_class)) {
         pr_err("Failed to create device info class!\n");
         return -ENOMEM;
