@@ -123,6 +123,24 @@ static bool __is_ctl_power_on(struct iris_hfi_device *device);
 static void __print_sidebandmanager_regs(struct iris_hfi_device *device);
 static void dump_noc_reg(struct iris_hfi_device *device);
 
+static int cvp_iommu_map(struct iommu_domain* domain, unsigned long iova, phys_addr_t paddr, size_t size, int prot)
+{
+	int rc = 0;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 2, 0)
+	rc = iommu_map(domain, iova,
+		paddr,
+		size,
+		prot,
+		0);
+#else
+	rc = iommu_map(domain, iova,
+		paddr,
+		size,
+		prot);
+#endif
+	return rc;
+}
+
 static struct cvp_hal_ops hal_ops = {
 	.interrupt_init = interrupt_init_iris2,
 	.setup_dsp_uc_memmap = setup_dsp_uc_memmap_vpu5,
@@ -1828,7 +1846,7 @@ static int __get_qdss_iommu_virtual_addr(struct iris_hfi_device *dev,
 
 	for (i = 0; i < num_entries; i++) {
 		if (domain) {
-			rc = iommu_map(domain, iova,
+			rc = cvp_iommu_map(domain, iova,
 					qdss_addr_tbl[i].start,
 					qdss_addr_tbl[i].size,
 					IOMMU_READ | IOMMU_WRITE);
@@ -2216,7 +2234,7 @@ static int __hwfence_regs_map(struct iris_hfi_device *device)
 	}
 
 	if (device->res->reg_mappings.ipclite_phyaddr != 0) {
-		rc = iommu_map(cb->domain,
+		rc = cvp_iommu_map(cb->domain,
 			device->res->reg_mappings.ipclite_iova,
 			device->res->reg_mappings.ipclite_phyaddr,
 			device->res->reg_mappings.ipclite_size,
@@ -2230,7 +2248,7 @@ static int __hwfence_regs_map(struct iris_hfi_device *device)
 		}
 	}
 	if (device->res->reg_mappings.hwmutex_phyaddr != 0) {
-		rc = iommu_map(cb->domain,
+		rc = cvp_iommu_map(cb->domain,
 			device->res->reg_mappings.hwmutex_iova,
 			device->res->reg_mappings.hwmutex_phyaddr,
 			device->res->reg_mappings.hwmutex_size,
@@ -2244,7 +2262,7 @@ static int __hwfence_regs_map(struct iris_hfi_device *device)
 		}
 	}
 	if (device->res->reg_mappings.aon_phyaddr != 0) {
-		rc = iommu_map(cb->domain,
+		rc = cvp_iommu_map(cb->domain,
 			device->res->reg_mappings.aon_iova,
 			device->res->reg_mappings.aon_phyaddr,
 			device->res->reg_mappings.aon_size,
@@ -2258,7 +2276,7 @@ static int __hwfence_regs_map(struct iris_hfi_device *device)
 		}
 	}
 	if (device->res->reg_mappings.timer_phyaddr != 0) {
-		rc = iommu_map(cb->domain,
+		rc = cvp_iommu_map(cb->domain,
 			device->res->reg_mappings.timer_iova,
 			device->res->reg_mappings.timer_phyaddr,
 			device->res->reg_mappings.timer_size,
