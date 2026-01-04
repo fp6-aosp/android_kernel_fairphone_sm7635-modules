@@ -30,7 +30,13 @@
 #include <linux/iommu.h>
 #include <linux/set_memory.h>
 #include <linux/range.h>
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+#include <linux/firmware/qcom/qcom_scm.h>
+#else
 #include <linux/qcom_scm.h>
+#endif
 
 MODULE_IMPORT_NS(DMA_BUF);
 

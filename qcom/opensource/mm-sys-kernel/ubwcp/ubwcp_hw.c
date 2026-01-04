@@ -10,9 +10,15 @@
 #include <linux/dma-buf.h>
 #include <linux/slab.h>
 #include <linux/cdev.h>
-#include <linux/qcom_scm.h>
 #include <linux/delay.h>
 #include <asm/barrier.h>
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+#include <linux/firmware/qcom/qcom_scm.h>
+#else
+#include <linux/qcom_scm.h>
+#endif
 
 #include "ubwcp_hw.h"
 
