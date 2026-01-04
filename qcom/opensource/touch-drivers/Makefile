@@ -1,6 +1,6 @@
 
 KBUILD_EXTRA_SYMBOLS := \
-    $(OUT_DIR)/../sm7635-modules/fairphone/emkit/Module.symvers
+    $(M)/../../../fairphone/emkit/Module.symvers
 
 KBUILD_OPTIONS+= TOUCH_ROOT=$(KERNEL_SRC)/$(M)
 KBUILD_OPTIONS += MODNAME?=touch_dlkm

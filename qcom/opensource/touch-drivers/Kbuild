@@ -82,7 +82,7 @@ KBUILD_CPPFLAGS += $(CDEFINES)
 
 ccflags-y += $(LINUX_INC)
 
-KBUILD_EXTRA_SYMBOLS +=$(OUT)/obj/sm7635-modules/fairphone/emkit/Module.symvers
+KBUILD_EXTRA_SYMBOLS +=$(M)/../../../fairphone/emkit/Module.symvers
 
 ifeq ($(call cc-option-yn, -Wmaybe-uninitialized),y)
 EXTRA_CFLAGS += -Wmaybe-uninitialized
