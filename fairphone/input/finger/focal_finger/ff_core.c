@@ -42,6 +42,8 @@
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 #include <linux/delay.h>
+#include <linux/pinctrl/consumer.h>
+#include <linux/version.h>
 
 #ifdef CONFIG_COMPAT
 #include <linux/compat.h>
@@ -1235,7 +1237,11 @@ static int ff_register_device(ff_context_t *ff_ctx)
     }
     FF_LOGD("ff devno:%x, %x", (int)ff_devno, (int)ff_ctx->ff_cdev.dev);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 3, 0)
+    ff_ctx->ff_class = class_create(FF_DRV_NAME);
+#else
     ff_ctx->ff_class = class_create(THIS_MODULE, FF_DRV_NAME);
+#endif
     if (IS_ERR(ff_ctx->ff_class)) {
         ret = PTR_ERR(ff_ctx->ff_class);
         FF_LOGE("create ff class fails,ret=%d", ret);
