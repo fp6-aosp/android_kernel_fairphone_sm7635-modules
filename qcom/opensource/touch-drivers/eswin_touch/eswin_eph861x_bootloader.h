@@ -3,6 +3,9 @@
 
 #include "eswin_eph861x_types.h"
 
+#define HAMBLE_FAMLIY     0x20
+#define HAMBLE_FULL_TOUCH 0x23
+
 extern int eph_chg_force_bootloader(struct eph_data *ephdata);
 extern int eph_bootloader_release_chg(struct eph_data *ephdata);
 extern int eph_send_frames(struct eph_data *ephdata);

@@ -119,7 +119,7 @@ int eph_send_frames(struct eph_data *ephdata)
     ephflash->frame_count = 1;
 #ifdef IC_UPDATE_DETECT
     // skip dev info in the head of requested fw
-    if (ephflash->fw->data[0] == ephdata->ephdeviceinfo.product_id)
+    if (ephflash->fw->data[0] == HAMBLE_FULL_TOUCH)
         ephflash->fw_pos = sizeof(struct eph_firmware_info);
     else
         ephflash->fw_pos = 0;
