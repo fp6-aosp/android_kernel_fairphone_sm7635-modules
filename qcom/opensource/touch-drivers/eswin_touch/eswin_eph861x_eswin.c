@@ -440,6 +440,37 @@ void eph_recovery_device(struct eph_data *ephdata)
     return;
 }
 
+void eph_normal_mode_recovery_device(struct eph_data *ephdata)
+{
+    int ret_val;
+
+    gpio_set_value(ephdata->ephplatform->gpio_reset, GPIO_RESET_YES_LOW);
+    if (ephdata->reg_vdd && regulator_is_enabled(ephdata->reg_vdd))
+        regulator_disable(ephdata->reg_vdd);
+    if (ephdata->reg_avdd && regulator_is_enabled(ephdata->reg_avdd))
+        regulator_disable(ephdata->reg_avdd);
+
+    msleep(200); // at least 100ms for ic discharge
+
+    if (ephdata->reg_vdd)
+        ret_val = regulator_enable(ephdata->reg_vdd);
+    if (ephdata->reg_avdd)
+        ret_val = regulator_enable(ephdata->reg_avdd);
+
+    msleep(20); // ic spec at least 10ms
+
+    gpio_set_value(ephdata->ephplatform->gpio_reset, GPIO_RESET_NO_HIGH);
+
+    // wait ic stable, ic spec should no comms action before ic has
+    // first data ready
+    // sleep over 200ms or wait INT be low
+    msleep(200);
+
+    dev_dbg(&ephdata->commsdevice->dev, "%s\n", __func__);
+
+    return;
+}
+
 void eph_reset_device(struct eph_data *ephdata)
 {
 
