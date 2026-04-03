@@ -28,6 +28,7 @@ extern void eph_regulator_enable(struct eph_data *ephdata);
 extern void eph_regulator_disable(struct eph_data *ephdata);
 extern void eph_reset_device(struct eph_data *ephdata);
 extern void eph_recovery_device(struct eph_data *ephdata);
+extern void eph_normal_mode_recovery_device(struct eph_data *ephdata);
 #ifdef IC_UPDATE_DETECT
 int eph_check_ic_update(struct eph_data *ephdata, const struct firmware *fw);
 #endif

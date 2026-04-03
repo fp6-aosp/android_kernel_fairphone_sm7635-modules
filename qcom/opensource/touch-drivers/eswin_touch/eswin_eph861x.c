@@ -1707,7 +1707,7 @@ static int eswin_ts_enable_edge_suppresion(struct device *dev, int mode)
         dev_err(dev, "failed to set edge_suppresion\n");
     }
     msleep(10);
-    dev_info(dev, "Success to %s edge_suppresion\n", mode ? "Enable" : "Disable");
+    dev_info(dev, "Success to %s edge_suppresion ret = %d\n", mode ? "Enable" : "Disable", ret);
     mutex_unlock(&ephdata->comms_mutex);
 
     return ret;
@@ -2885,6 +2885,7 @@ static int eph_deep_mode_enable(struct eph_data *ephdata, int enable)
     mutex_lock(&ephdata->comms_mutex);
     ret_val = eph_write_control_config(ephdata, length, &cfg[0]);
     mutex_unlock(&ephdata->comms_mutex);
+    dev_info(&ephdata->commsdevice->dev, "eph_deep_mode_enable enable = %d, ret_val = %d", enable, ret_val);
     return ret_val;
 }
 
@@ -2966,8 +2967,24 @@ static int eph_dev_enter_normal_mode(struct eph_data *ephdata)
 
         ephdata->edge_suppresion = 0;
         ret_val = eswin_ts_enable_edge_suppresion(dev, ephdata->edge_suppresion);
-	        if (ret_val)
-                dev_err(dev, "edge_suppresion mode set failed %d\n", ret_val);
+        if (ret_val) {
+            dev_err(dev, "edge_suppresion mode set failed ret_val = %d, will recovery tic\n", ret_val);
+            eph_normal_mode_recovery_device(ephdata);
+            dev_err(dev, "tic recovery done!\n");
+            if (ephdata->charger_mode) {
+                ret_val = eswin_ts_enable_charger_mode(dev, ephdata->charger_mode);
+                if (ret_val)
+                    dev_err(dev, "charger mode set failed %d\n", ret_val);
+            }
+            if (ephdata->glove_mode) {
+                ret_val = eswin_ts_enable_glove_mode(dev, ephdata->glove_mode);
+                if (ret_val)
+                    dev_err(dev, "glove mode set failed %d\n", ret_val);
+            }
+
+            ephdata->edge_suppresion = 0;
+            ret_val = eswin_ts_enable_edge_suppresion(dev, ephdata->edge_suppresion);
+        }
 
         ephdata->lp = false;
     }
